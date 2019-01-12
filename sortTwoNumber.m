@@ -1,15 +1,12 @@
-function [isSort,array] = sortTwoNumber(array)
+function [isSort,array] = sortTwoNumber(numberOne,numberTwo)
 
-if (array(1) < array(2))
+isSort = true;
+if (numberOne < numberTwo)
+    array = [numberOne,numberTwo];
     return;
-end;
-
-if (array(1) > array(2))
-    val = array(1);
-    array(1) = array(2);
-    array(2) = val;
+else
+    array = [numberTwo,numberOne];
     isSort = false;
 end;
-return;
 
 end
