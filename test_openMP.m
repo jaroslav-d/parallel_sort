@@ -38,19 +38,25 @@ end;
 array = [array(1),d,array(end)];
 
 %%
-spmd
-    a = randperm(10);
-    a = sortBubble(a);
-end;
-%%
-spmd
-N = 10;
-Y = randi(2) - 1;   % Random 0 or 1
-X = randperm(N);          % Replicated on every worker
-C1 = codistributed(X); % Partitioned among the workers
+
+array = randperm(10000);
+c = parcluster;
+array = [array, repelem(NaN, mod(length(array), c.NumWorkers))];
+arrayNew = reshape(array,[],c.NumWorkers);
+parfor i = 1:size(arrayNew,2)
+    arrayNew(:,i) = sortBubble(arrayNew(:,i));
 end
 
 %%
-array = 10:-1:1;
-arrayTwo = sortBubbleOpenMP(array);
-% arrayTwo = sortBubble(array);
+spmd
+    N = 3;
+    Y = randi(2) - 1;   % Random 0 or 1
+    X = randperm(N);          % Replicated on every worker
+    C1 = codistributed(X); % Partitioned among the workers
+end
+
+%%
+array = 10000:-1:1;
+array = [array,NaN,NaN];
+% arrayTwo = sortBubbleOpenMP(array);
+arrayTwo = sortBubble(array);
