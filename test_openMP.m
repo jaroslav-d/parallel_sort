@@ -40,13 +40,15 @@ array = [array(1),d,array(end)];
 %%
 
 array = randperm(10000);
+tic;
 c = parcluster;
 array = [array, repelem(NaN, mod(length(array), c.NumWorkers))];
 arrayNew = reshape(array,[],c.NumWorkers);
 parfor i = 1:size(arrayNew,2)
     arrayNew(:,i) = sortBubble(arrayNew(:,i));
 end
-
+arraySorted = sortMergePartial(arrayNew);
+toc
 %%
 spmd
     N = 3;
@@ -56,7 +58,13 @@ spmd
 end
 
 %%
-array = 10000:-1:1;
-array = [array,NaN,NaN];
-% arrayTwo = sortBubbleOpenMP(array);
+clear;
+array = randperm(10000);
 arrayTwo = sortBubble(array);
+
+%%
+clear;
+array = randperm(10000);
+tic
+arraySorted = sort(array);
+toc

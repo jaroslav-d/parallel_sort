@@ -1,6 +1,6 @@
 function arrayNew = sortMergePartial(array)
 
-if ((size(array,2)/2) > 1)
+if ((size(array,2)/2) >= 1)
     arrayOne = sortMergePartial(array(:,1:round(end/2)));
     arrayTwo = sortMergePartial(array(:,round(end/2)+1:end));
     arrayNew = zeros(size(arrayOne,1)+size(arrayTwo,1),1);
@@ -22,15 +22,15 @@ if ((size(array,2)/2) > 1)
         end;
         
         if (nOne > size(arrayOne,1))
-            for i = nTwo:length(arrayTwo)
-                arrayNew(nOne+nTwo-1) = arrayTwo(i);
+            for i = nOne+nTwo-1:size(arrayNew,1)
+                arrayNew(i) = arrayTwo(i-nOne+1);
             end;
             endCycle = true;
         end;
         
         if (nTwo > size(arrayTwo,1))
-            for i = nOne:length(arrayOne)
-                arrayNew(nOne+nTwo-1) = arrayTwo(i);
+            for i = nOne+nTwo-1:size(arrayNew,1)
+                arrayNew(i) = arrayOne(i-nTwo+1);
             end;
             endCycle = true;
         end;
