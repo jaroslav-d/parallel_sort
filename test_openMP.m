@@ -1,70 +1,41 @@
-% array = round(rand(1,10^3)*10^2);
-% [arrayOne,arrayTwo] = divideArrayForBubbleSort(array,0);
-
-%% without openmp
-array = round(rand(1,10^3)*10^2);
-newArray = sortBubble(array);
-
-%% with openmp
-array = round(rand(1,10^5)*10^2);
-tic;
-% p = gcp(); % get the current parallel pool
-f = parfeval(p,@sortBubble,1,array);
-value = fetchOutputs(f);
-toc
-
-%%  
-array = randperm(10);
-part = [0,1];
-%%
-iterator = 1:2:length(array);
-d = [];
-parfor i = 1:length(iterator)
-    ii = iterator(i);
-    c = array(ii+part);
-    c = sortTwoNumber(c);
-    d = [d,c];
-end;
-array = d;
-%%
-d = [];
-iterator = 2:2:length(array)-1;
-parfor i = 1:length(iterator)
-    ii = iterator(i);
-    c = array(ii+part);
-    c = sortTwoNumber(c);
-    d = [d,c];
-end;
-array = [array(1),d,array(end)];
-
-%%
-
-array = randperm(10000);
-tic;
-c = parcluster;
-array = [array, repelem(NaN, mod(length(array), c.NumWorkers))];
-arrayNew = reshape(array,[],c.NumWorkers);
-parfor i = 1:size(arrayNew,2)
-    arrayNew(:,i) = sortBubble(arrayNew(:,i));
-end
-arraySorted = sortMergePartial(arrayNew);
-toc
-%%
-spmd
-    N = 3;
-    Y = randi(2) - 1;   % Random 0 or 1
-    X = randperm(N);          % Replicated on every worker
-    C1 = codistributed(X); % Partitioned among the workers
-end
-
-%%
+%% begin data
 clear;
 array = randperm(10000);
-arrayTwo = sortBubble(array);
-
+pp = parpool('local',2);
+% delete(gcp('nocreate'));
 %%
-clear;
-array = randperm(10000);
+%   parallel sorts the bubble array
+% for i = 1:100
+    array = randperm(10000);
+    tic;
+    arraySorted = sortBubbleOpenMP(array,pp);
+    t = toc;
+    fprintf('Total sorting time: %1.4f second\n',t);
+% end;
+plot(arraySorted,'c*');
+%%
+%   parallel sorts the array by the method of successive minima
+% for i = 1:100
+    array = randperm(10000);
+    tic;
+    arraySorted = sortSelectOpenMP(array,pp);
+    t = toc;
+    fprintf('Total sorting time: %1.4f second\n',t);
+% end;
+plot(arraySorted,'c*');
+%%
+%   matlab sorting method
 tic
 arraySorted = sort(array);
-toc
+t = toc;
+fprintf('Total sorting time: %1.4f second\n',t);
+%%
+%   bubble sort method
+for i = 1:100
+    arrayTwo = sortBubble(array);
+end;
+%%
+%   selection sort method
+for i = 1:100
+    arrayTwo = sortSelect(array);
+end;

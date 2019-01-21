@@ -1,36 +1,16 @@
-function array = sortBubbleOpenMP(array)
-tic;
-isSort = false;
+function arraySorted = sortBubbleOpenMP(array,cluster)
 
-while ~isSort
-    d = [];
-    isSortPar = true;
-    arrayOne = array(1:2:end);
-    arrayTwo = array(2:2:end);
-    parfor i = 1:length(arrayOne)
-        a = arrayOne(i);
-        b = arrayTwo(i);
-        [isSort,c] = sortTwoNumber(a,b);
-        d = [d,c];
-        isSortPar = isSortPar * isSort;
-    end;
-    array = d;
-    isSort = isSortPar;
-    if isSort
-        break;
-    end;
-    d = [];
-    arrayOne = array(2:2:end-1);
-    arrayTwo = array(3:2:end-1);
-    parfor i = 1:length(arrayOne)
-        a = arrayOne(i);
-        b = arrayTwo(i);
-        [isSort,c] = sortTwoNumber(a,b);
-        d = [d,c];
-        isSortPar = isSortPar * isSort;
-    end;
-    array = [array(1),d,array(end)];
-    isSort = isSortPar;
+c = cluster;
+surplus = mod(length(array), c.NumWorkers);
+if surplus ~= 0
+    array = [array, repelem(NaN, c.NumWorkers - surplus)];
+else
+    array = [array, repelem(NaN, surplus)];
 end;
-toc
+arrayNew = reshape(array,[],c.NumWorkers);
+parfor i = 1:size(arrayNew,2)
+    arrayNew(:,i) = sortBubble(arrayNew(:,i));
+end
+arraySorted = sortMergePartial(arrayNew);
+
 end
